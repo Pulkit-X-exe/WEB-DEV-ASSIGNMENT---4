@@ -29,6 +29,10 @@ app.get("/", (req, res) => {
   res.send("Secure Connect API is running");
 });
 
+io.on("connection", (socket) => {
+  console.log("User connected");
+});
+
 server.listen(port, () => {
   console.log("Server is running on port " + port);
 });
