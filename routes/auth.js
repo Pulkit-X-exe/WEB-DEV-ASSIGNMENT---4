@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 
 router.post("/signup", async (req, res) => {
   try {
@@ -72,6 +73,10 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
+});
+
+router.get("/admin", authMiddleware, adminMiddleware, (req, res) => {
+  res.status(200).json({ message: "Welcome Admin" });
 });
 
 module.exports = router;
