@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Note = require("../models/Note");
 const eventEmitter = require("../events");
 const { authMiddleware } = require("../middleware/auth");
@@ -44,6 +45,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
     const note = await Note.findById(req.params.id);
 
     if (!note) {
@@ -62,6 +67,10 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
     const note = await Note.findById(req.params.id);
 
     if (!note) {
@@ -92,6 +101,10 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
     const note = await Note.findById(req.params.id);
 
     if (!note) {
