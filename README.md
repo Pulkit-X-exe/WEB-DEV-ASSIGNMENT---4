@@ -44,6 +44,20 @@ secure-connect/
 ├── middleware/
 │   └── auth.js
 │
+├── screenshots/
+│   ├── 01_signup_success.png
+│   ├── 02_login_success.png
+│   ├── 03_create_note.png
+│   ├── 04_get_all_notes.png
+│   ├── 05_get_note_by_id.png
+│   ├── 06_update_note.png
+│   ├── 07_delete_note.png
+│   ├── 08_access_without_token.png
+│   ├── 09_access_with_invalid_token.png
+│   ├── 10_admin_route_as_normal_user.png
+│   ├── 11_admin_route_as_admin.png
+│   └── 12_socket_chat_terminal.png
+│
 ├── server.js
 ├── events.js
 ├── test-auth.js
@@ -107,42 +121,113 @@ MongoDB connected successfully
 - `PUT /notes/:id` - Update a note by ID (fields: `title`, `content`)
 - `DELETE /notes/:id` - Delete a note by ID
 
+---
+
+## Postman API Testing & Screenshots
+
+### 1. User Registration (POST /signup)
+Registers a new user, hashes the password using bcrypt, saves the user in MongoDB, and triggers the `userSignup` EventEmitter event.
+
+![01 Signup Success](screenshots/01_signup_success.png)
+
+---
+
+### 2. User Login & JWT Generation (POST /login)
+Verifies credentials using bcrypt comparison and returns a signed JSON Web Token (JWT).
+
+![02 Login Success](screenshots/02_login_success.png)
+
+---
+
+### 3. Create Note (POST /notes)
+Creates a personal note attached to the authenticated user ID.
+
+![03 Create Note](screenshots/03_create_note.png)
+
+---
+
+### 4. Get All My Notes (GET /notes)
+Retrieves all notes belonging strictly to the authenticated user.
+
+![04 Get All Notes](screenshots/04_get_all_notes.png)
+
+---
+
+### 5. Get Note By ID (GET /notes/:id)
+Retrieves a specific note by its ID after verifying user ownership.
+
+![05 Get Note By ID](screenshots/05_get_note_by_id.png)
+
+---
+
+### 6. Update Note (PUT /notes/:id)
+Updates title and content of the note while enforcing user authorization.
+
+![06 Update Note](screenshots/06_update_note.png)
+
+---
+
+### 7. Delete Note (DELETE /notes/:id)
+Deletes a specific note after verifying that the requesting user is the owner.
+
+![07 Delete Note](screenshots/07_delete_note.png)
+
+---
+
+### 8. Authorization - Access Without Token (GET /notes)
+Rejects unauthenticated requests with `401 Unauthorized` and `Access denied`.
+
+![08 Access Without Token](screenshots/08_access_without_token.png)
+
+---
+
+### 9. Authorization - Access With Invalid Token (GET /notes)
+Rejects invalid or expired JWT tokens with `401 Unauthorized` and `Invalid token`.
+
+![09 Access With Invalid Token](screenshots/09_access_with_invalid_token.png)
+
+---
+
+### 10. Role-Based Access Control - Normal User on Admin Route (GET /admin)
+Rejects normal users from accessing the admin route with `403 Forbidden` and `Access denied: Admins only`.
+
+![10 Admin Route As Normal User](screenshots/10_admin_route_as_normal_user.png)
+
+---
+
+### 11. Role-Based Access Control - Admin User on Admin Route (GET /admin)
+Grants access to users with `role: "admin"` with `200 OK` and `Welcome Admin`.
+
+![11 Admin Route As Admin](screenshots/11_admin_route_as_admin.png)
+
+---
+
+### 12. Real-Time Chat & Server Event Output
+Demonstrates live Socket.io events (`connection`, `chatMessage`, `disconnect`) and EventEmitter notifications.
+
+![12 Socket Chat Terminal](screenshots/12_socket_chat_terminal.png)
+
+---
+
 ## How to Test Using Postman
 1. Open Postman.
 2. Click **Import** and select `Secure Connect Lab 4.postman_collection.json`.
-3. Set the `baseUrl` variable to `http://localhost:5000` (or the port defined in your `.env`).
-4. Run the **Signup** request under Authentication to register a new user.
-5. Run the **Login** request under Authentication to receive a token.
-6. Copy the returned token into the collection variable `token` or pass it in the Authorization header: `Bearer <token>`.
-7. Test the **Notes** endpoints:
-   - Create Note
-   - Get All Notes (copy a note's `_id` into the `noteId` variable)
-   - Get Note By ID
-   - Update Note
-   - Delete Note
-8. Test the **Authorization** endpoints:
-   - Access without token -> returns 401 Access denied
-   - Access with invalid token -> returns 401 Invalid token
-   - Access admin route as normal user -> returns 403 Access denied: Admins only
+3. Set the `baseUrl` variable to `http://localhost:5000` (or your port).
+4. Run the requests in the collection:
+   - **Signup** -> registers user
+   - **Login** -> copy returned token into collection variable `token`
+   - **Create Note**, **Get All Notes**, **Get Note By ID**, **Update Note**, **Delete Note**
+   - **Authorization** test cases
 
 ## How to Test Real-Time Chat (Socket.io)
-You can test the Socket.io real-time chat in two ways:
-
-1. Using the included test client script:
+1. Run the client test script:
 ```bash
-node test-chat.js
+npm run test:chat
 ```
-Expected output:
-```text
-User connected
-Message received: Hello from client
-User disconnected
-```
-
-2. Using Postman WebSocket / Socket.io request:
-   - Click **New** -> **Socket.IO**.
-   - Set URL: `ws://localhost:5000`.
-   - Click **Connect** (Server console displays: `User connected`).
+2. Or in Postman:
+   - Select **New** -> **Socket.IO**.
+   - URL: `ws://localhost:5000`.
+   - Click **Connect** (Console displays: `User connected`).
+   - Emit event: `chatMessage` with message string `"Hello"`.
    - Listen for event: `chatMessage`.
-   - Send event: `chatMessage` with message string `"Hello"`.
-   - Click **Disconnect** (Server console displays: `User disconnected`).
+   - Click **Disconnect** (Console displays: `User disconnected`).
