@@ -34,4 +34,8 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+router.post("/login", async (req, res) => {
+  res.send("Login route");
+});
+
 module.exports = router;
