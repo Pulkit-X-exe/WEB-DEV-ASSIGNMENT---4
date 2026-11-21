@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/Note");
+const eventEmitter = require("../events");
 const { authMiddleware } = require("../middleware/auth");
 
 router.use(authMiddleware);
@@ -20,6 +21,8 @@ router.post("/", async (req, res) => {
     });
 
     const savedNote = await note.save();
+
+    eventEmitter.emit("noteCreated", savedNote.title);
 
     res.status(201).json({
       message: "Note created successfully",

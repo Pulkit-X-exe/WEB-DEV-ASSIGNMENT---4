@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const eventEmitter = require("../events");
 const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 
 router.post("/signup", async (req, res) => {
@@ -29,6 +30,8 @@ router.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
+
+    eventEmitter.emit("userSignup", newUser.name);
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
