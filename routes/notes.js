@@ -18,7 +18,8 @@ router.post("/", async (req, res) => {
     const note = new Note({
       title: title,
       content: content,
-      userId: req.user.id
+      userId: req.user.id,
+      owner: req.user.id
     });
 
     const savedNote = await note.save();
@@ -26,8 +27,13 @@ router.post("/", async (req, res) => {
     eventEmitter.emit("noteCreated", savedNote.title);
 
     res.status(201).json({
-      message: "Note created successfully",
-      note: savedNote
+      _id: savedNote._id,
+      title: savedNote.title,
+      content: savedNote.content,
+      owner: savedNote.owner,
+      userId: savedNote.userId,
+      createdAt: savedNote.createdAt,
+      updatedAt: savedNote.updatedAt
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -36,7 +42,9 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const notes = await Note.find({ userId: req.user.id });
+    const notes = await Note.find({
+      $or: [{ userId: req.user.id }, { owner: req.user.id }]
+    });
     res.status(200).json(notes);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -55,7 +63,8 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    if (note.userId.toString() !== req.user.id) {
+    const ownerId = note.owner ? note.owner.toString() : note.userId.toString();
+    if (ownerId !== req.user.id) {
       return res.status(403).json({ message: "Not authorized to view this note" });
     }
 
@@ -77,7 +86,8 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    if (note.userId.toString() !== req.user.id) {
+    const ownerId = note.owner ? note.owner.toString() : note.userId.toString();
+    if (ownerId !== req.user.id) {
       return res.status(403).json({ message: "Not authorized to update this note" });
     }
 
@@ -87,6 +97,7 @@ router.put("/:id", async (req, res) => {
     if (req.body.content) {
       note.content = req.body.content;
     }
+    note.updatedAt = new Date();
 
     const updatedNote = await note.save();
 
@@ -111,7 +122,8 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    if (note.userId.toString() !== req.user.id) {
+    const ownerId = note.owner ? note.owner.toString() : note.userId.toString();
+    if (ownerId !== req.user.id) {
       return res.status(403).json({ message: "Not authorized to delete this note" });
     }
 

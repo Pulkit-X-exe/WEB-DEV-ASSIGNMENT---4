@@ -1,7 +1,7 @@
 async function testAuth() {
   const email = "pulkit_test_" + Date.now() + "@example.com";
 
-  const signupResponse = await fetch("http://localhost:5001/signup", {
+  const signupResponse = await fetch("http://localhost:5000/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -13,7 +13,7 @@ async function testAuth() {
   const signupData = await signupResponse.json();
   console.log("Signup:", signupResponse.status, signupData);
 
-  const loginResponse = await fetch("http://localhost:5001/login", {
+  const loginResponse = await fetch("http://localhost:5000/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

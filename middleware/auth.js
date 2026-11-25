@@ -1,16 +1,23 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
+  const authHeader = req.headers["authorization"] || req.headers["cookie"];
 
   if (!authHeader) {
-    return res.status(401).json({ message: "Access denied" });
+    return res.status(403).json({ message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
+  let token = "";
+  if (authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (authHeader.includes("token=")) {
+    token = authHeader.split("token=")[1].split(";")[0];
+  } else {
+    token = authHeader;
+  }
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied" });
+    return res.status(403).json({ message: "No token provided" });
   }
 
   try {

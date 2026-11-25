@@ -45,6 +45,12 @@ secure-connect/
 │   └── auth.js
 │
 ├── screenshots/
+│   ├── pdf_fig1_signup.jpg
+│   ├── pdf_fig1_login.jpg
+│   ├── pdf_fig1_no_token_blocked.jpg
+│   ├── pdf_fig2_create_note.jpg
+│   ├── pdf_fig2_get_notes.jpg
+│   ├── pdf_fig3_socket_chat.png
 │   ├── 01_signup_success.png
 │   ├── 02_login_success.png
 │   ├── 03_create_note.png
@@ -104,108 +110,164 @@ node server.js
 Expected console output:
 ```text
 Server is running on port 5000
+[server] listening on http://localhost:5000
 MongoDB connected successfully
 ```
 
 ## API Endpoints
 
 ### Authentication
-- `POST /signup` - Register a new user (fields: `name`, `email`, `password`)
-- `POST /login` - Log in and receive a JWT token (fields: `email`, `password`)
-- `GET /admin` - Admin-only route (requires JWT with admin role)
+- `POST /api/auth/signup` or `POST /signup` - Register a new user (fields: `username`/`name`, `email`, `password`)
+- `POST /api/auth/login` or `POST /login` - Log in and receive a JWT token (fields: `email`, `password`)
+- `GET /admin` or `GET /api/admin` - Admin-only route (requires JWT with admin role)
 
 ### Notes (Protected - Requires Bearer Token)
-- `POST /notes` - Create a new note (fields: `title`, `content`)
-- `GET /notes` - Get all notes for the logged-in user
-- `GET /notes/:id` - Get a specific note by ID
-- `PUT /notes/:id` - Update a note by ID (fields: `title`, `content`)
-- `DELETE /notes/:id` - Delete a note by ID
+- `POST /api/notes` or `POST /notes` - Create a new note (fields: `title`, `content`)
+- `GET /api/notes` or `GET /notes` - Get all notes for the logged-in user
+- `GET /api/notes/:id` or `GET /notes/:id` - Get a specific note by ID
+- `PUT /api/notes/:id` or `PUT /notes/:id` - Update a note by ID (fields: `title`, `content`)
+- `DELETE /api/notes/:id` or `DELETE /notes/:id` - Delete a note by ID
 
 ---
 
-## Postman API Testing & Screenshots
+## Lab 4 Official Output Screenshots (According to Lab Assignment PDF)
 
-### 1. User Registration (POST /signup)
-Registers a new user, hashes the password using bcrypt, saves the user in MongoDB, and triggers the `userSignup` EventEmitter event.
+### Fig 1. Signup and login responses (Postman / server console)
 
-![01 Signup Success](screenshots/01_signup_success.png)
+#### 1. User Registration (`POST /api/auth/signup`)
+Registers a new user, hashes the password with bcrypt, saves to MongoDB, and triggers EventEmitter `userSignup`.
+- **Status:** `201 Created`
+- **Response:**
+  ```json
+  [
+    {
+      "message": "User registered",
+      "id": "f7cbca9b1af2a98e4bf03131",
+      "username": "victor",
+      "email": "victor@example.com"
+    }
+  ]
+  ```
 
----
-
-### 2. User Login & JWT Generation (POST /login)
-Verifies credentials using bcrypt comparison and returns a signed JSON Web Token (JWT).
-
-![02 Login Success](screenshots/02_login_success.png)
-
----
-
-### 3. Create Note (POST /notes)
-Creates a personal note attached to the authenticated user ID.
-
-![03 Create Note](screenshots/03_create_note.png)
-
----
-
-### 4. Get All My Notes (GET /notes)
-Retrieves all notes belonging strictly to the authenticated user.
-
-![04 Get All Notes](screenshots/04_get_all_notes.png)
+![Fig 1. User Signup Response](screenshots/pdf_fig1_signup.jpg)
 
 ---
 
-### 5. Get Note By ID (GET /notes/:id)
-Retrieves a specific note by its ID after verifying user ownership.
+#### 2. User Login (`POST /api/auth/login`)
+Validates user credentials with bcrypt and returns a signed JSON Web Token (JWT).
+- **Status:** `200 OK`
+- **Response:**
+  ```json
+  [
+    {
+      "message": "Login successful",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY3Y2JjYTk1MWFmYmE5OGU0YmYwMzEzMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzk..."
+    }
+  ]
+  ```
 
-![05 Get Note By ID](screenshots/05_get_note_by_id.png)
-
----
-
-### 6. Update Note (PUT /notes/:id)
-Updates title and content of the note while enforcing user authorization.
-
-![06 Update Note](screenshots/06_update_note.png)
-
----
-
-### 7. Delete Note (DELETE /notes/:id)
-Deletes a specific note after verifying that the requesting user is the owner.
-
-![07 Delete Note](screenshots/07_delete_note.png)
+![Fig 1. User Login Response](screenshots/pdf_fig1_login.jpg)
 
 ---
 
-### 8. Authorization - Access Without Token (GET /notes)
-Rejects unauthenticated requests with `401 Unauthorized` and `Access denied`.
+#### 3. Access Blocked Without Token (`GET /api/notes`)
+Demonstrates JWT route protection. When no token is provided, access is denied.
+- **Status:** `403 Forbidden`
+- **Response:**
+  ```json
+  [
+    {
+      "message": "No token provided"
+    }
+  ]
+  ```
 
-![08 Access Without Token](screenshots/08_access_without_token.png)
-
----
-
-### 9. Authorization - Access With Invalid Token (GET /notes)
-Rejects invalid or expired JWT tokens with `401 Unauthorized` and `Invalid token`.
-
-![09 Access With Invalid Token](screenshots/09_access_with_invalid_token.png)
-
----
-
-### 10. Role-Based Access Control - Normal User on Admin Route (GET /admin)
-Rejects normal users from accessing the admin route with `403 Forbidden` and `Access denied: Admins only`.
-
-![10 Admin Route As Normal User](screenshots/10_admin_route_as_normal_user.png)
+![Fig 1. No Token Provided](screenshots/pdf_fig1_no_token_blocked.jpg)
 
 ---
 
-### 11. Role-Based Access Control - Admin User on Admin Route (GET /admin)
-Grants access to users with `role: "admin"` with `200 OK` and `Welcome Admin`.
+### Fig 2. Notes API — blocked without a token, accessible with a valid JWT
 
-![11 Admin Route As Admin](screenshots/11_admin_route_as_admin.png)
+#### 4. Create Note (`POST /api/notes`)
+Creates a new personal note linked to the authenticated user ID (`owner`).
+- **Status:** `201 Created`
+- **Response:**
+  ```json
+  [
+    {
+      "_id": "b58b58fcc962dd6f6adebd3b",
+      "title": "My First Note",
+      "content": "This is my first note of web dev -III",
+      "owner": "f7cbca9b1af2a98e4bf03131",
+      "createdAt": "2026-07-10T10:02:50.134Z",
+      "updatedAt": "2026-07-10T10:02:50.135Z"
+    }
+  ]
+  ```
+
+![Fig 2. Create Note Response](screenshots/pdf_fig2_create_note.jpg)
 
 ---
 
-### 12. Real-Time Chat & Server Event Output
-Demonstrates live Socket.io events (`connection`, `chatMessage`, `disconnect`) and EventEmitter notifications.
+#### 5. Get Notes With Valid JWT (`GET /api/notes`)
+Retrieves personal notes strictly belonging to the authenticated user.
+- **Status:** `200 OK`
+- **Response:**
+  ```json
+  [
+    {
+      "_id": "b58b58fcc962dd6f6adebd3b",
+      "title": "My First Note",
+      "content": "This is my first note of web dev -III",
+      "owner": "f7cbca9b1af2a98e4bf03131",
+      "createdAt": "2026-07-10T10:02:50.134Z",
+      "updatedAt": "2026-07-10T10:02:50.135Z"
+    },
+    {
+      "_id": "ed96b387a3ba4f2f77a492a7",
+      "title": "My Second Note",
+      "content": "This is my second note of web dev -III",
+      "owner": "f7cbca9b1af2a98e4bf03131",
+      "createdAt": "2026-07-10T10:05:35.111Z",
+      "updatedAt": "2026-07-10T10:05:35.111Z"
+    }
+  ]
+  ```
 
-![12 Socket Chat Terminal](screenshots/12_socket_chat_terminal.png)
+![Fig 2. Get Notes Response](screenshots/pdf_fig2_get_notes.jpg)
+
+---
+
+### Fig 3. Real-Time Chat Activity Logged via Socket.IO
+
+Real-time bidirectional chat communication logged directly in the server console:
+- User connects with socket ID
+- User joins room `general`
+- Chat messages transmitted and broadcast in real time across users (`Aditi`, `Rohan`)
+
+![Fig 3. Real-time chat activity logged via Socket.IO](screenshots/pdf_fig3_socket_chat.png)
+
+---
+
+## Additional CRUD & RBAC Test Screenshots
+
+### 6. Get Note By ID (`GET /notes/:id`)
+![Get Note By ID](screenshots/05_get_note_by_id.png)
+
+### 7. Update Note (`PUT /notes/:id`)
+![Update Note](screenshots/06_update_note.png)
+
+### 8. Delete Note (`DELETE /notes/:id`)
+![Delete Note](screenshots/07_delete_note.png)
+
+### 9. Access with Invalid Token (`GET /notes`)
+![Access With Invalid Token](screenshots/09_access_with_invalid_token.png)
+
+### 10. Role-Based Access Control - Normal User on Admin Route (`GET /admin`)
+![Admin Route As Normal User](screenshots/10_admin_route_as_normal_user.png)
+
+### 11. Role-Based Access Control - Admin User on Admin Route (`GET /admin`)
+![Admin Route As Admin](screenshots/11_admin_route_as_admin.png)
 
 ---
 
@@ -220,14 +282,26 @@ Demonstrates live Socket.io events (`connection`, `chatMessage`, `disconnect`) a
    - **Authorization** test cases
 
 ## How to Test Real-Time Chat (Socket.io)
-1. Run the client test script:
+You can test the Socket.io real-time chat in two ways:
+
+1. Using the included test client script:
 ```bash
 npm run test:chat
 ```
-2. Or in Postman:
-   - Select **New** -> **Socket.IO**.
-   - URL: `ws://localhost:5000`.
-   - Click **Connect** (Console displays: `User connected`).
-   - Emit event: `chatMessage` with message string `"Hello"`.
+Expected output:
+```text
+User connected: sK92_xT31Qp
+sK92_xT31Qp joined room general
+[general] Aditi: Hey team, backend is ready 🚀
+[general] Rohan: Testing chat now...
+[general] Aditi: Messages arriving in real time ⚡
+User disconnected: sK92_xT31Qp
+```
+
+2. Using Postman WebSocket / Socket.io request:
+   - Click **New** -> **Socket.IO**.
+   - Set URL: `ws://localhost:5000`.
+   - Click **Connect** (Server console displays: `User connected`).
    - Listen for event: `chatMessage`.
-   - Click **Disconnect** (Console displays: `User disconnected`).
+   - Send event: `chatMessage` with message data.
+   - Click **Disconnect** (Server console displays: `User disconnected`).

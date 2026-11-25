@@ -8,9 +8,10 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const userName = req.body.username || req.body.name;
+    const { email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!userName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -23,7 +24,8 @@ router.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
-      name: name,
+      name: userName,
+      username: userName,
       email: email,
       password: hashedPassword,
       role: "user"
@@ -33,7 +35,12 @@ router.post("/signup", async (req, res) => {
 
     eventEmitter.emit("userSignup", newUser.name);
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({
+      message: "User registered",
+      id: newUser._id,
+      username: newUser.name,
+      email: newUser.email
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -69,6 +76,7 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.name,
         email: user.email,
         role: user.role
       }

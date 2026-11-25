@@ -1,7 +1,7 @@
 async function testNotes() {
   const email = "pulkit_notes_" + Date.now() + "@example.com";
 
-  await fetch("http://localhost:5001/signup", {
+  await fetch("http://localhost:5000/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -11,7 +11,7 @@ async function testNotes() {
     })
   });
 
-  const loginResponse = await fetch("http://localhost:5001/login", {
+  const loginResponse = await fetch("http://localhost:5000/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -22,10 +22,10 @@ async function testNotes() {
   const loginData = await loginResponse.json();
   const token = loginData.token;
 
-  const noTokenResponse = await fetch("http://localhost:5001/notes");
+  const noTokenResponse = await fetch("http://localhost:5000/notes");
   console.log("No token:", noTokenResponse.status);
 
-  const createResponse = await fetch("http://localhost:5001/notes", {
+  const createResponse = await fetch("http://localhost:5000/notes", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -41,19 +41,19 @@ async function testNotes() {
 
   const noteId = createData.note._id;
 
-  const getAllResponse = await fetch("http://localhost:5001/notes", {
+  const getAllResponse = await fetch("http://localhost:5000/notes", {
     headers: { "Authorization": "Bearer " + token }
   });
   const allNotes = await getAllResponse.json();
   console.log("Get all notes:", getAllResponse.status, allNotes.length);
 
-  const getOneResponse = await fetch("http://localhost:5001/notes/" + noteId, {
+  const getOneResponse = await fetch("http://localhost:5000/notes/" + noteId, {
     headers: { "Authorization": "Bearer " + token }
   });
   const oneNote = await getOneResponse.json();
   console.log("Get note by id:", getOneResponse.status, oneNote.title);
 
-  const updateResponse = await fetch("http://localhost:5001/notes/" + noteId, {
+  const updateResponse = await fetch("http://localhost:5000/notes/" + noteId, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +67,7 @@ async function testNotes() {
   const updateData = await updateResponse.json();
   console.log("Update note:", updateResponse.status, updateData.message);
 
-  const deleteResponse = await fetch("http://localhost:5001/notes/" + noteId, {
+  const deleteResponse = await fetch("http://localhost:5000/notes/" + noteId, {
     method: "DELETE",
     headers: { "Authorization": "Bearer " + token }
   });
