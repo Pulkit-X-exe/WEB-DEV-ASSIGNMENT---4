@@ -45,24 +45,17 @@ secure-connect/
 │   └── auth.js
 │
 ├── screenshots/
-│   ├── pdf_fig1_signup.jpg
-│   ├── pdf_fig1_login.jpg
-│   ├── pdf_fig1_no_token_blocked.jpg
-│   ├── pdf_fig2_create_note.jpg
-│   ├── pdf_fig2_get_notes.jpg
-│   ├── pdf_fig3_socket_chat.png
-│   ├── 01_signup_success.png
-│   ├── 02_login_success.png
-│   ├── 03_create_note.png
-│   ├── 04_get_all_notes.png
-│   ├── 05_get_note_by_id.png
-│   ├── 06_update_note.png
-│   ├── 07_delete_note.png
-│   ├── 08_access_without_token.png
-│   ├── 09_access_with_invalid_token.png
-│   ├── 10_admin_route_as_normal_user.png
-│   ├── 11_admin_route_as_admin.png
-│   └── 12_socket_chat_terminal.png
+│   ├── signup.png
+│   ├── login.png
+│   ├── create-note.png
+│   ├── get-notes.png
+│   ├── get-note.png
+│   ├── update-note.png
+│   ├── delete-note.png
+│   ├── no-token.png
+│   ├── invalid-token.png
+│   ├── admin.png
+│   └── chat.png
 │
 ├── server.js
 ├── events.js
@@ -117,157 +110,95 @@ MongoDB connected successfully
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/signup` or `POST /signup` - Register a new user (fields: `username`/`name`, `email`, `password`)
-- `POST /api/auth/login` or `POST /login` - Log in and receive a JWT token (fields: `email`, `password`)
+- `POST /api/auth/signup` or `POST /signup` - Register a new user
+- `POST /api/auth/login` or `POST /login` - Log in and receive a JWT token
 - `GET /admin` or `GET /api/admin` - Admin-only route (requires JWT with admin role)
 
 ### Notes (Protected - Requires Bearer Token)
-- `POST /api/notes` or `POST /notes` - Create a new note (fields: `title`, `content`)
+- `POST /api/notes` or `POST /notes` - Create a new note
 - `GET /api/notes` or `GET /notes` - Get all notes for the logged-in user
 - `GET /api/notes/:id` or `GET /notes/:id` - Get a specific note by ID
-- `PUT /api/notes/:id` or `PUT /notes/:id` - Update a note by ID (fields: `title`, `content`)
+- `PUT /api/notes/:id` or `PUT /notes/:id` - Update a note by ID
 - `DELETE /api/notes/:id` or `DELETE /notes/:id` - Delete a note by ID
 
 ---
 
-## Lab 4 Official Output Screenshots (According to Lab Assignment PDF)
+## Postman API Testing & Screenshots
 
-### Fig 1. Signup and login responses (Postman / server console)
+### 1. User Registration (`POST /signup`)
+Registers a new user, hashes the password using bcrypt, and saves the user to MongoDB.
 
-#### 1. User Registration (`POST /api/auth/signup`)
-Registers a new user, hashes the password with bcrypt, saves to MongoDB, and triggers EventEmitter `userSignup`.
-- **Status:** `201 Created`
-- **Response:**
-  ```json
-  [
-    {
-      "message": "User registered",
-      "id": "f7cbca9b1af2a98e4bf03131",
-      "username": "victor",
-      "email": "victor@example.com"
-    }
-  ]
-  ```
-
-![Fig 1. User Signup Response](screenshots/pdf_fig1_signup.jpg)
+![Signup](screenshots/signup.png)
 
 ---
 
-#### 2. User Login (`POST /api/auth/login`)
-Validates user credentials with bcrypt and returns a signed JSON Web Token (JWT).
-- **Status:** `200 OK`
-- **Response:**
-  ```json
-  [
-    {
-      "message": "Login successful",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY3Y2JjYTk1MWFmYmE5OGU0YmYwMzEzMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzk..."
-    }
-  ]
-  ```
+### 2. User Login & JWT Token Generation (`POST /login`)
+Verifies user credentials using bcrypt comparison and returns a signed JSON Web Token (JWT).
 
-![Fig 1. User Login Response](screenshots/pdf_fig1_login.jpg)
+![Login](screenshots/login.png)
 
 ---
 
-#### 3. Access Blocked Without Token (`GET /api/notes`)
-Demonstrates JWT route protection. When no token is provided, access is denied.
-- **Status:** `403 Forbidden`
-- **Response:**
-  ```json
-  [
-    {
-      "message": "No token provided"
-    }
-  ]
-  ```
+### 3. Create Note (`POST /notes`)
+Creates a personal note attached to the authenticated user ID (`owner`).
 
-![Fig 1. No Token Provided](screenshots/pdf_fig1_no_token_blocked.jpg)
+![Create Note](screenshots/create-note.png)
 
 ---
 
-### Fig 2. Notes API — blocked without a token, accessible with a valid JWT
+### 4. Get All Notes (`GET /notes`)
+Retrieves all personal notes belonging to the authenticated user.
 
-#### 4. Create Note (`POST /api/notes`)
-Creates a new personal note linked to the authenticated user ID (`owner`).
-- **Status:** `201 Created`
-- **Response:**
-  ```json
-  [
-    {
-      "_id": "b58b58fcc962dd6f6adebd3b",
-      "title": "My First Note",
-      "content": "This is my first note of web dev -III",
-      "owner": "f7cbca9b1af2a98e4bf03131",
-      "createdAt": "2026-07-10T10:02:50.134Z",
-      "updatedAt": "2026-07-10T10:02:50.135Z"
-    }
-  ]
-  ```
-
-![Fig 2. Create Note Response](screenshots/pdf_fig2_create_note.jpg)
+![Get All Notes](screenshots/get-notes.png)
 
 ---
 
-#### 5. Get Notes With Valid JWT (`GET /api/notes`)
-Retrieves personal notes strictly belonging to the authenticated user.
-- **Status:** `200 OK`
-- **Response:**
-  ```json
-  [
-    {
-      "_id": "b58b58fcc962dd6f6adebd3b",
-      "title": "My First Note",
-      "content": "This is my first note of web dev -III",
-      "owner": "f7cbca9b1af2a98e4bf03131",
-      "createdAt": "2026-07-10T10:02:50.134Z",
-      "updatedAt": "2026-07-10T10:02:50.135Z"
-    },
-    {
-      "_id": "ed96b387a3ba4f2f77a492a7",
-      "title": "My Second Note",
-      "content": "This is my second note of web dev -III",
-      "owner": "f7cbca9b1af2a98e4bf03131",
-      "createdAt": "2026-07-10T10:05:35.111Z",
-      "updatedAt": "2026-07-10T10:05:35.111Z"
-    }
-  ]
-  ```
+### 5. Get Note By ID (`GET /notes/:id`)
+Retrieves a specific note by its ID after verifying user ownership.
 
-![Fig 2. Get Notes Response](screenshots/pdf_fig2_get_notes.jpg)
+![Get Note](screenshots/get-note.png)
 
 ---
 
-### Fig 3. Real-Time Chat Activity Logged via Socket.IO
+### 6. Update Note (`PUT /notes/:id`)
+Updates the title and content of an existing note while enforcing user ownership.
 
-Real-time bidirectional chat communication logged directly in the server console:
-- User connects with socket ID
-- User joins room `general`
-- Chat messages transmitted and broadcast in real time across users (`Aditi`, `Rohan`)
-
-![Fig 3. Real-time chat activity logged via Socket.IO](screenshots/pdf_fig3_socket_chat.png)
+![Update Note](screenshots/update-note.png)
 
 ---
 
-## Additional CRUD & RBAC Test Screenshots
+### 7. Delete Note (`DELETE /notes/:id`)
+Deletes a specific note after verifying user ownership.
 
-### 6. Get Note By ID (`GET /notes/:id`)
-![Get Note By ID](screenshots/05_get_note_by_id.png)
+![Delete Note](screenshots/delete-note.png)
 
-### 7. Update Note (`PUT /notes/:id`)
-![Update Note](screenshots/06_update_note.png)
+---
 
-### 8. Delete Note (`DELETE /notes/:id`)
-![Delete Note](screenshots/07_delete_note.png)
+### 8. Access Without Token (`GET /notes`)
+Rejects unauthenticated requests with `403 Forbidden` (`No token provided`).
 
-### 9. Access with Invalid Token (`GET /notes`)
-![Access With Invalid Token](screenshots/09_access_with_invalid_token.png)
+![No Token](screenshots/no-token.png)
 
-### 10. Role-Based Access Control - Normal User on Admin Route (`GET /admin`)
-![Admin Route As Normal User](screenshots/10_admin_route_as_normal_user.png)
+---
 
-### 11. Role-Based Access Control - Admin User on Admin Route (`GET /admin`)
-![Admin Route As Admin](screenshots/11_admin_route_as_admin.png)
+### 9. Access With Invalid Token (`GET /notes`)
+Rejects invalid or expired JWT tokens with `401 Unauthorized` (`Invalid token`).
+
+![Invalid Token](screenshots/invalid-token.png)
+
+---
+
+### 10. Role-Based Access Control (`GET /admin`)
+Restricted route accessible only to users with the `admin` role.
+
+![Admin Route](screenshots/admin.png)
+
+---
+
+### 11. Real-Time Chat (`Socket.IO Console`)
+Demonstrates live Socket.IO connection, room joining, and real-time messaging logged in the console.
+
+![Socket.IO Chat](screenshots/chat.png)
 
 ---
 
@@ -275,7 +206,7 @@ Real-time bidirectional chat communication logged directly in the server console
 1. Open Postman.
 2. Click **Import** and select `Secure Connect Lab 4.postman_collection.json`.
 3. Set the `baseUrl` variable to `http://localhost:5000` (or your port).
-4. Run the requests in the collection:
+4. Run the requests in order:
    - **Signup** -> registers user
    - **Login** -> copy returned token into collection variable `token`
    - **Create Note**, **Get All Notes**, **Get Note By ID**, **Update Note**, **Delete Note**
